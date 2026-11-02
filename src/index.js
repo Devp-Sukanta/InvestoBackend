@@ -15,10 +15,14 @@ dotenv.config();
 
 const app = express();
 
-var corsOptions = {
-  origin: 'http://localhost:5173',
-  optionsSuccessStatus: 200
-}
+const corsOptions = {
+  origin: [
+    "http://localhost:5173",
+    "https://investo-app.netlify.app",
+
+  ],
+  optionsSuccessStatus: 200,
+};
 
 app.use(express.json());
 app.use(cors(corsOptions))
