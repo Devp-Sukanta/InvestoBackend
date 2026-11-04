@@ -175,4 +175,11 @@ const initScheduler = () => {
 };
 
 
-export {distributeLevelIncome, processDailyRoi, initScheduler}
+const sanitizeCsvCell = (val) => {
+  if (val === null || val === undefined) return '""';
+  const str = String(val).replace(/"/g, '""');
+  return `"${str}"`;
+};
+
+
+export {distributeLevelIncome, processDailyRoi, initScheduler, sanitizeCsvCell}

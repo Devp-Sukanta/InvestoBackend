@@ -1,53 +1,55 @@
-
 import jwt from "jsonwebtoken";
+import User from "../models/User.model.js";
+import { errorMessage } from "../utils/Message.js";
 
-const authMiddleware = (allowedRoles = []) => {
-  return (req, res, next) => {
+/**
+ * Middleware to authenticate JWT and enforce role authorization
+ * @param {Array<string>} rolesAllowed - e.g., ["admin"] or ["user", "admin"]
+ */
+const authMiddleware = (rolesAllowed = []) => {
+  return async (req, res, next) => {
     try {
-      if (allowedRoles.includes("anonymous")) {
-        return next();
+      let token = null;
+
+      if (
+        req.headers.authorization &&
+        req.headers.authorization.startsWith("Bearer")
+      ) {
+        token = req.headers.authorization.split(" ")[1];
       }
 
-      const authHeader = req.headers.authorization;
-
-      if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return res.status(401).json({
-          success: false,
-          message: "Authentication required. Please login.",
-        });
+      if (!token) {
+        return errorMessage(res, 401, "Access denied. No token provided.");
       }
 
-      const token = authHeader.split(" ")[1];
-
+ 
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      if (!decoded.id) {
-        return res.status(401).json({
-          success: false,
-          message: "Invalid authentication token.",
-        });
+
+      const user = await User.findById(decoded.id || decoded._id);
+      if (!user) {
+        return errorMessage(res, 401, "User no longer exists.");
+      }
+
+      if (user.accountStatus !== "active") {
+        return errorMessage(res, 403, "Your account is not active.");
       }
 
 
-      if (!allowedRoles.includes("user")) {
-        return res.status(403).json({
-          success: false,
-          message: "You are not authorized to access this resource.",
-        });
+      if (rolesAllowed.length > 0 && !rolesAllowed.includes(user.role)) {
+        return errorMessage(
+          res,
+          403,
+          "Forbidden. You do not have permission to access this resource."
+        );
       }
 
-      req.user = decoded;
-
+  
+      req.user = user;
       next();
-
     } catch (error) {
-      return res.status(401).json({
-        success: false,
-        message:
-          error.name === "TokenExpiredError"
-            ? "Session expired. Please login again."
-            : "Invalid authentication token.",
-      });
+      console.error("Auth Middleware Error:", error.message);
+      return errorMessage(res, 401, "Invalid or expired token.");
     }
   };
 };

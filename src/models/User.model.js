@@ -25,7 +25,19 @@ const userSchema = new mongoose.Schema(
 
     password: {
       type: String,
-      select: false, 
+      select: false,
+    },
+
+    resetPasswordToken: {
+      type: String,
+      default: null,
+      select: false,
+    },
+    
+    resetPasswordExpire: {
+      type: Date,
+      default: null,
+      select: false,
     },
 
     referralCode: {
@@ -61,6 +73,13 @@ const userSchema = new mongoose.Schema(
       min: 0,
     },
 
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
+      index: true,
+    },
+
     accountStatus: {
       type: String,
       enum: ["active", "inactive", "suspended", "deleted"],
@@ -71,7 +90,7 @@ const userSchema = new mongoose.Schema(
   {
     timestamps: true,
     versionKey: false,
-  }
+  },
 );
 
 const User = mongoose.model("User", userSchema);

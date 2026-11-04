@@ -7,6 +7,7 @@ import userRoute from './routes/user.route.js';
 import investmentRoute from './routes/investment.route.js';
 import referrelRoute from './routes/referrel.route.js';
 import dashboardRoute from './routes/dashboard.route.js';
+import adminRoute from './routes/admin.route.js';
 import cors from 'cors'
 
 
@@ -37,6 +38,7 @@ app.use("/user", userRoute);
 app.use("/investment", investmentRoute);
 app.use("/referrel", referrelRoute);
 app.use("/dashboard", dashboardRoute);
+app.use("/admin",adminRoute);
 
 
 
